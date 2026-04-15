@@ -2,455 +2,572 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FroFroChat - School Social Media</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GeoEduDash - Mathematics in Motion</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap');
-
         :root {
-            --frofro-purple: #8B5CF6;
-            --frofro-pink: #EC4899;
-            --frofro-bg: #F9FAFB;
+            --bg-color: #0a0a1a;
+            --grid-color: rgba(0, 242, 254, 0.1);
+            --player-color: #00f2fe;
+            --hazard-color: #ff4b2b;
+            --ground-color: #0f172a;
+            --accent-color: #4facfe;
         }
 
-        body {
-            font-family: 'Fredoka', sans-serif;
-            background-color: var(--frofro-bg);
-            overflow-x: hidden;
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            touch-action: none;
+            color: white;
+            user-select: none;
+            cursor: default;
         }
 
-        .fro-gradient {
-            background: linear-gradient(135deg, var(--frofro-purple), var(--frofro-pink));
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
 
-        .fro-card {
-            background: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
-        }
-
-        .nav-item.active {
-            color: var(--frofro-purple);
-            border-bottom: 3px solid var(--frofro-purple);
-        }
-
-        .menu-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        canvas {
+            display: block;
+            background: linear-gradient(to bottom, #1a1a2e, #0f172a);
             cursor: pointer;
         }
 
-        .menu-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.1);
+        #ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
-        .custom-scroll::-webkit-scrollbar {
-            width: 6px;
+        .menu-container {
+            pointer-events: auto;
+            text-align: center;
+            z-index: 10;
         }
 
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background-color: #e5e7eb;
+        h1.main-title {
+            font-size: 5rem;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #fff, var(--player-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 15px rgba(0, 242, 254, 0.5));
+            animation: titleFloat 2s ease-in-out infinite;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: -2px;
+        }
+
+        .credit-text {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-top: -5px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(79, 172, 254, 0.5);
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.02); }
+        }
+
+        .play-btn {
+            width: 120px;
+            height: 120px;
+            background: #22c55e;
+            border: 6px solid white;
+            border-radius: 20%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 20px auto;
+            transition: transform 0.1s, background 0.2s;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            pointer-events: auto;
+        }
+
+        .play-btn:hover { transform: scale(1.05); background: #28d667; }
+        .play-btn:active { transform: scale(0.95); }
+
+        .play-btn svg {
+            width: 60px;
+            height: 60px;
+            fill: white;
+            margin-left: 8px;
+        }
+
+        .menu-card {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 3px solid var(--accent-color);
+            backdrop-filter: blur(10px);
+            min-width: 320px;
+            text-align: center;
+            pointer-events: auto;
+        }
+
+        button.standard-btn {
+            padding: 14px 40px;
+            font-size: 1.3rem;
+            background: var(--accent-color);
+            border: 2px solid white;
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        button.standard-btn:hover { background: #60b5ff; }
+        button.standard-btn:active { transform: scale(0.95); }
+
+        #progress-bar-container {
+            position: absolute;
+            top: 30px;
+            width: 50%;
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid white;
             border-radius: 10px;
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .photo-preview-box {
-            display: none;
-            width: 100%;
-            height: 200px;
-            border-radius: 1rem;
             overflow: hidden;
-            margin-top: 1rem;
-            position: relative;
         }
 
-        .input-field {
-            width: 100%;
-            padding: 0.6rem 1rem;
-            border-radius: 0.75rem;
-            background: #f3f4f6;
-            border: 2px solid transparent;
-            transition: all 0.2s;
-            outline: none;
-            font-size: 0.875rem;
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--player-color);
+            transition: width 0.1s linear;
         }
 
-        .input-field:focus {
-            border-color: var(--frofro-purple);
-            background: white;
+        .level-indicator {
+            position: absolute;
+            top: 50px;
+            left: 20px;
+            font-weight: bold;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .hidden { display: none !important; }
+
+        #mute-toggle {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            pointer-events: auto;
+            background: rgba(0,0,0,0.6);
+            border: 2px solid var(--accent-color);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.9rem;
         }
     </style>
 </head>
-<body class="text-gray-800" onload="initApp()">
+<body>
 
-    <!-- Main Menu Dashboard -->
-    <div id="main-menu" class="min-h-screen flex flex-col items-center justify-center p-6 animate-fade-in">
-        <div class="text-center mb-12">
-            <div class="fro-gradient w-20 h-20 rounded-[2rem] flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-xl">
-                <i class="fas fa-comment-dots"></i>
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="ui-layer">
+        <div id="level-text" class="level-indicator hidden">Level 1</div>
+
+        <div id="main-menu" class="menu-container">
+            <h1 class="main-title">GeoEduDash</h1>
+            <div class="credit-text">Made by Dillon</div>
+            <div class="play-btn" id="start-btn" title="Start Game">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </div>
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">FroFroChat</h1>
-            <h2 class="text-xl text-gray-500">Welcome back, <span id="menu-user-name" class="text-purple-600 font-bold">Student</span>! 👋</h2>
+            <p style="font-weight: bold; text-shadow: 0 2px 4px black; margin: 0;">SPACE or CLICK to Start</p>
+            <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">4 Levels of Increasing Challenge</p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full">
-            <div onclick="openAppSection('feed')" class="fro-card menu-card p-8 text-center flex flex-col items-center border-b-4 border-purple-400">
-                <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-3xl mb-4">
-                    <i class="fas fa-home"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-1">Student Feed</h3>
-                <p class="text-sm text-gray-400">Post updates and see what's trending.</p>
-            </div>
-            <div onclick="openAppSection('photos')" class="fro-card menu-card p-8 text-center flex flex-col items-center border-b-4 border-pink-400">
-                <div class="w-16 h-16 bg-pink-100 text-pink-600 rounded-2xl flex items-center justify-center text-3xl mb-4">
-                    <i class="fas fa-camera"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-1">Photo Hub</h3>
-                <p class="text-sm text-gray-400">Share your favorite school moments.</p>
-            </div>
-            <div onclick="openAppSection('chat')" class="fro-card menu-card p-8 text-center flex flex-col items-center border-b-4 border-blue-400">
-                <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-4">
-                    <i class="fas fa-comments"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-1">Class Chat</h3>
-                <p class="text-sm text-gray-400">Real-time messaging with classmates.</p>
-            </div>
+        <div id="death-menu" class="menu-card hidden">
+            <h1 style="color: var(--hazard-color); margin: 0; font-size: 2.5rem;">CRASHED!</h1>
+            <p id="death-stats" style="margin: 15px 0; font-size: 1.2rem;"></p>
+            <button id="retry-btn" class="standard-btn">RETRY (Space)</button>
+        </div>
+
+        <div id="win-menu" class="menu-card hidden">
+            <h1 style="color: #22c55e; margin: 0; font-size: 2.5rem;">GODLIKE!</h1>
+            <p style="margin: 15px 0;">You mastered all 4 levels.</p>
+            <button id="win-btn" class="standard-btn">REPLAY</button>
+        </div>
+
+        <div id="progress-bar-container" class="hidden">
+            <div id="progress-bar"></div>
         </div>
         
-        <p class="mt-12 text-gray-400 text-sm font-medium">Safe Space for Students • No Sign-in Required</p>
+        <button id="mute-toggle">MUSIC: ON</button>
     </div>
+</div>
 
-    <!-- Main App UI -->
-    <div id="main-app" class="hidden">
-        <nav class="sticky top-0 z-50 bg-white border-b border-gray-100 px-4 md:px-8 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="backToMenu()">
-                <div class="fro-gradient w-10 h-10 rounded-xl flex items-center justify-center text-white text-xl">
-                    <i class="fas fa-comment-dots"></i>
-                </div>
-                <h1 class="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-500">FroFroChat</h1>
-            </div>
+<script>
+    /** --- AUDIO ENGINE --- **/
+    const AudioEngine = (() => {
+        let audioCtx = null;
+        let isMuted = false;
+        let loopInterval = null;
+        let step = 0;
 
-            <div class="hidden md:flex items-center gap-8">
-                <button onclick="switchTab('feed')" id="btn-feed" class="nav-item active font-semibold py-1">Feed</button>
-                <button onclick="switchTab('photos')" id="btn-photos" class="nav-item font-semibold py-1 text-gray-400">Photos</button>
-                <button onclick="switchTab('chat')" id="btn-chat" class="nav-item font-semibold py-1 text-gray-400">Chat</button>
-            </div>
-
-            <div class="flex items-center gap-4">
-                <button onclick="backToMenu()" class="hidden md:flex items-center gap-2 text-sm font-bold text-gray-400 hover:text-purple-600 transition">
-                    <i class="fas fa-th-large"></i> Menu
-                </button>
-                <img id="user-avatar" src="" class="w-10 h-10 rounded-full border-2 border-purple-200" alt="Me">
-            </div>
-        </nav>
-
-        <main class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 pb-24 md:pb-6">
-            
-            <!-- Left Sidebar -->
-            <aside class="hidden lg:block lg:col-span-3 space-y-6">
-                <div class="fro-card p-5">
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">My Profile</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-500 ml-1">NAME</label>
-                            <input type="text" id="settings-name" oninput="updateProfile()" class="input-field" placeholder="Your name">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-gray-500 ml-1">HANDLE</label>
-                            <input type="text" id="settings-handle" oninput="updateProfile()" class="input-field" placeholder="Username">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="fro-card p-5 sticky top-24">
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">School Clubs</h2>
-                    <div class="space-y-3">
-                        <div class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                            <span class="text-lg">🤖</span>
-                            <div>
-                                <p class="text-sm font-bold">Robotics Club</p>
-                                <p class="text-[10px] text-gray-400">Meetings: Tuesday @ 4PM</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-xl cursor-pointer transition">
-                            <span class="text-lg">🎨</span>
-                            <div>
-                                <p class="text-sm font-bold">Art Society</p>
-                                <p class="text-[10px] text-gray-400">Meetings: Friday @ 3PM</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Content Area -->
-            <section id="content-area" class="lg:col-span-6">
-                <!-- Tab: FEED -->
-                <div id="tab-feed" class="tab-content space-y-6">
-                    <div class="fro-card p-5">
-                        <div class="flex gap-4">
-                            <img id="post-input-avatar" src="" class="w-10 h-10 rounded-full" alt="Me">
-                            <div class="w-full">
-                                <textarea id="post-input" class="w-full bg-gray-50 rounded-2xl p-4 focus:outline-none focus:ring-2 focus:ring-purple-200 resize-none transition" placeholder="Tell the school something cool!"></textarea>
-                                <div id="photo-preview-container" class="photo-preview-box">
-                                    <img id="photo-preview-img" src="" class="w-full h-full object-cover">
-                                    <button onclick="removePhoto()" class="absolute top-2 right-2 bg-black/50 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-black transition">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex justify-between items-center mt-4">
-                            <div class="flex gap-4 text-gray-500 ml-14">
-                                <button onclick="triggerPhotoUpload()" class="hover:text-purple-500 transition flex items-center gap-2">
-                                    <i class="far fa-image"></i>
-                                    <span class="text-sm font-medium">Photo</span>
-                                </button>
-                            </div>
-                            <button onclick="createPost()" class="fro-gradient text-white px-8 py-2.5 rounded-full font-bold shadow-lg hover:scale-105 transition active:scale-95">Post</button>
-                        </div>
-                    </div>
-                    <div id="posts-container" class="space-y-6"></div>
-                </div>
-
-                <!-- Tab: PHOTOS -->
-                <div id="tab-photos" class="tab-content hidden space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold">Photo Hub</h2>
-                        <button onclick="triggerPhotoUpload()" class="fro-gradient text-white px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2">
-                            <i class="fas fa-upload"></i> Share Moment
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4" id="photo-gallery"></div>
-                </div>
-
-                <!-- Tab: CHAT -->
-                <div id="tab-chat" class="tab-content hidden h-[calc(100vh-180px)] flex flex-col">
-                    <div class="fro-card flex flex-col flex-grow overflow-hidden">
-                        <div class="p-4 border-b flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div>
-                                <p class="font-bold text-sm">Classroom Lounge</p>
-                                <p class="text-xs text-green-500">Public Room</p>
-                            </div>
-                        </div>
-                        <div id="chat-window" class="flex-grow overflow-y-auto p-4 space-y-4 custom-scroll"></div>
-                        <div class="p-4 border-t bg-white">
-                            <div class="flex gap-2">
-                                <input type="text" id="chat-input" placeholder="Say hi to the class..." class="w-full bg-gray-50 rounded-full px-5 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-200 text-sm">
-                                <button onclick="sendMessage()" class="fro-gradient text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md">
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Right Sidebar -->
-            <aside class="hidden lg:block lg:col-span-3">
-                <div class="fro-card p-5">
-                    <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">Friends Online</h2>
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Chloe" class="w-8 h-8 rounded-full">
-                            <span class="text-sm font-medium">Chloe Chen</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Leo" class="w-8 h-8 rounded-full">
-                            <span class="text-sm font-medium">Leo Garcia</span>
-                        </div>
-                    </div>
-                </div>
-            </aside>
-        </main>
-
-        <!-- Mobile Nav -->
-        <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-3 flex justify-around items-center z-50">
-            <button onclick="backToMenu()" class="text-gray-400"><i class="fas fa-th-large text-xl"></i></button>
-            <button onclick="switchTab('feed')" class="text-purple-600"><i class="fas fa-home text-xl"></i></button>
-            <button onclick="switchTab('photos')" class="text-gray-400"><i class="fas fa-camera text-xl"></i></button>
-            <button onclick="switchTab('chat')" class="text-gray-400"><i class="fas fa-comment-dots text-xl"></i></button>
-        </div>
-    </div>
-
-    <div id="toast" class="fixed bottom-24 left-1/2 -translate-x-1/2 fro-gradient text-white px-6 py-3 rounded-full shadow-2xl hidden opacity-0 transition-all duration-300 transform translate-y-4 z-[3000]">
-        <p id="toast-message" class="font-bold text-sm"></p>
-    </div>
-
-    <script>
-        let currentUser = {
-            username: "@student",
-            name: "Student",
-            avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=frofro"
+        const init = () => {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         };
-        let pendingPhoto = null;
 
-        const schoolPhotos = [
-            "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&q=80&w=600",
-            "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=600",
-            "https://images.unsplash.com/photo-1523050853064-8bd486a414b4?auto=format&fit=crop&q=80&w=600",
-            "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&q=80&w=600"
-        ];
+        const playNote = (freq, type, duration, vol = 0.1) => {
+            if (isMuted || !audioCtx || audioCtx.state === 'suspended') return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        };
 
-        function initApp() {
-            document.getElementById('settings-name').value = currentUser.name;
-            document.getElementById('settings-handle').value = currentUser.username;
-            updateUI();
-            initData();
+        const startMusic = () => {
+            init();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            if (loopInterval) clearInterval(loopInterval);
+            step = 0;
+            loopInterval = setInterval(() => {
+                const bassNotes = [110, 110, 146, 110, 130, 110, 98, 110];
+                if (step % 2 === 0) playNote(bassNotes[(step / 2) % 8], 'square', 0.2, 0.04);
+                if (step % 4 === 0) playNote(60, 'sine', 0.1, 0.15);
+                const melody = [440, 0, 440, 523, 0, 392, 440, 0, 587, 0, 523, 440];
+                if (melody[step % melody.length] > 0) {
+                    playNote(melody[step % melody.length], 'triangle', 0.3, 0.07);
+                }
+                step++;
+            }, 150);
+        };
+
+        const stopMusic = () => {
+            if (loopInterval) clearInterval(loopInterval);
+            loopInterval = null;
+        };
+
+        const toggleMute = () => {
+            isMuted = !isMuted;
+            if (isMuted) stopMusic();
+            else if (gameState === 'PLAYING') startMusic();
+            return isMuted;
+        };
+
+        return { startMusic, stopMusic, toggleMute, init };
+    })();
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const ui = {
+        main: document.getElementById('main-menu'),
+        death: document.getElementById('death-menu'),
+        win: document.getElementById('win-menu'),
+        startBtn: document.getElementById('start-btn'),
+        retryBtn: document.getElementById('retry-btn'),
+        winBtn: document.getElementById('win-btn'),
+        progress: document.getElementById('progress-bar'),
+        progContainer: document.getElementById('progress-bar-container'),
+        levelText: document.getElementById('level-text'),
+        muteBtn: document.getElementById('mute-toggle')
+    };
+
+    const PLAYER_SIZE = 40;
+    const GROUND_HEIGHT = 100;
+
+    let gameState = 'MENU';
+    let currentLevel = 1;
+    let attempts = 1;
+    let cameraX = 0;
+    let particles = [];
+    let trail = [];
+    let isPressed = false;
+    let levelEndMarker = 0;
+
+    let player = { x: 150, y: 0, vy: 0, rotation: 0, isGrounded: false };
+
+    // Level Definitions
+    // 0: Empty, 1: Block, 2: Spike, 3: Small Spike, 4: Ceiling Block, 5: Portal (Mode Change)
+    const levels = {
+        1: { // Intro Platforming
+            speed: 7, grav: 0.72, jump: -11.5, fly: false,
+            data: [0,0,0,0,0,0,0,0, 1,1,1,1,1,1,1, 0,0,2,0,0,0, 1,1,1,0,0,0, 0,0,2,0,1,1,1, 0,0,0,1,1,1, 0,0,2,0,0,1,1, 1,1,1,1,0,0,2,0, 1,1,1,1,1,0,0,0, 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1]
+        },
+        2: { // Flying Challenge
+            speed: 8.5, grav: 0.45, jump: 0, fly: true,
+            data: [0,0,0,0,0,0,0,0, 1,1,1,0,0,2,2,0,0, 1,1,1,0,0,2,2,0,0, 4,4,4,4,4,0,0,0,4,4,4, 0,0,2,0,0,2,0,0,2, 1,1,1,0,0,0,1,1,1, 4,4,4,0,0,0,4,4,4, 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1]
+        },
+        3: { // Memory / High Speed
+            speed: 10, grav: 0.8, jump: -13, fly: false,
+            data: [0,0,0,0,0,0,0,0, 1,1,0,0,2,0,0,1,1, 0,0,2,2,0,0,1,1, 1,1,1,0,0,2,0,0,2, 1,1,1,0,0,1,1,1, 0,0,2,2,2,0,0,1,1, 1,1,0,0,2,0,2,0,1,1, 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1]
+        },
+        4: { // Hybrid Chaos
+            speed: 9, grav: 0.72, jump: -11.5, fly: false, 
+            data: [0,0,0,0,0,0,0,0, 1,1,1,0,0,2,0,0, 5,0,0,0,0,0,0,0, 4,4,2,2,4,4, 5,0,0,0,0,2,0,0, 1,1,1,2,0,1,1,1, 2,2,2,0,0,0,2,2,2, 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         }
+    };
 
-        function updateUI() {
-            document.getElementById('menu-user-name').innerText = currentUser.name;
-            document.getElementById('user-avatar').src = currentUser.avatar;
-            document.getElementById('post-input-avatar').src = currentUser.avatar;
+    const map = [];
+    function buildLevel() {
+        map.length = 0;
+        let currentX = 0;
+        const lvl = levels[currentLevel];
+        lvl.data.forEach((type) => {
+            if (type === 1) map.push({ x: currentX, y: canvas.height - GROUND_HEIGHT - 40, w: 40, h: 40, type: 'block' });
+            else if (type === 4) map.push({ x: currentX, y: 0, w: 40, h: 180, type: 'block' });
+            else if (type === 2) map.push({ x: currentX, y: canvas.height - GROUND_HEIGHT, type: 'spike' });
+            else if (type === 3) map.push({ x: currentX, y: canvas.height - GROUND_HEIGHT, type: 'small-spike' });
+            else if (type === 5) map.push({ x: currentX, y: canvas.height/2 - 50, w: 40, h: 100, type: 'portal' });
+            currentX += 40;
+        });
+        levelEndMarker = currentX;
+    }
+
+    function jump() {
+        if (gameState !== 'PLAYING') return;
+        const lvl = levels[currentLevel];
+        if (!lvl.fly && player.isGrounded) {
+            player.vy = lvl.jump;
+            player.isGrounded = false;
         }
+    }
 
-        function updateProfile() {
-            const newName = document.getElementById('settings-name').value.trim() || "Student";
-            const newHandle = document.getElementById('settings-handle').value.trim() || "@student";
-            
-            currentUser.name = newName;
-            currentUser.username = newHandle.startsWith('@') ? newHandle : '@' + newHandle;
-            currentUser.avatar = `https://api.dicebear.com/7.x/avataaars/svg?seed=${currentUser.username}`;
-            
-            updateUI();
-        }
+    function startGame(level = 1) {
+        currentLevel = level;
+        AudioEngine.startMusic();
+        gameState = 'PLAYING';
+        player.x = 150;
+        player.y = canvas.height - GROUND_HEIGHT - PLAYER_SIZE;
+        player.vy = 0;
+        player.rotation = 0;
+        cameraX = 0;
+        particles = [];
+        trail = [];
+        buildLevel();
+        
+        ui.main.classList.add('hidden');
+        ui.death.classList.add('hidden');
+        ui.win.classList.add('hidden');
+        ui.levelText.classList.remove('hidden');
+        ui.levelText.innerText = `Level ${currentLevel}: ${getLevelName()}`;
+        ui.progContainer.classList.remove('hidden');
+    }
 
-        function openAppSection(id) {
-            document.getElementById('main-menu').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-            switchTab(id);
-        }
+    function getLevelName() {
+        if (currentLevel === 1) return "The Beginning";
+        if (currentLevel === 2) return "Flight School";
+        if (currentLevel === 3) return "Hyper Speed";
+        return "Ultimate Chaos";
+    }
 
-        function backToMenu() {
-            document.getElementById('main-app').classList.add('hidden');
-            document.getElementById('main-menu').classList.remove('hidden');
-        }
-
-        function switchTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.getElementById(`tab-${id}`).classList.remove('hidden');
-
-            document.querySelectorAll('.nav-item').forEach(b => {
-                b.classList.remove('active', 'text-purple-500');
-                b.classList.add('text-gray-400');
+    function die() {
+        if (gameState === 'DEAD') return;
+        gameState = 'DEAD';
+        AudioEngine.stopMusic();
+        for (let i = 0; i < 20; i++) {
+            particles.push({
+                x: player.x + PLAYER_SIZE/2, y: player.y + PLAYER_SIZE/2,
+                vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12,
+                life: 1.0, color: '#ff4b2b'
             });
-            const btn = document.getElementById(`btn-${id}`);
-            if (btn) btn.classList.add('active', 'text-purple-500');
         }
-
-        function triggerPhotoUpload() {
-            const randomPhoto = schoolPhotos[Math.floor(Math.random() * schoolPhotos.length)];
-            pendingPhoto = randomPhoto;
-            
-            const preview = document.getElementById('photo-preview-container');
-            const previewImg = document.getElementById('photo-preview-img');
-            previewImg.src = randomPhoto;
-            preview.style.display = 'block';
-            showToast("Photo selected! 📸");
-        }
-
-        function removePhoto() {
-            pendingPhoto = null;
-            document.getElementById('photo-preview-container').style.display = 'none';
-        }
-
-        function createPost() {
-            const input = document.getElementById('post-input');
-            const content = input.value.trim();
-            if (!content && !pendingPhoto) return;
-
-            const container = document.getElementById('posts-container');
-            const postHTML = `
-                <div class="fro-card overflow-hidden animate-fade-in">
-                    <div class="p-5 flex items-center gap-3">
-                        <img src="${currentUser.avatar}" class="w-10 h-10 rounded-full border border-purple-100">
-                        <div><p class="font-bold text-sm">${currentUser.name}</p><p class="text-xs text-gray-400">Just now</p></div>
-                    </div>
-                    ${content ? `<div class="px-5 pb-4"><p class="text-gray-700 font-medium">${content}</p></div>` : ''}
-                    ${pendingPhoto ? `<img src="${pendingPhoto}" class="w-full h-64 object-cover">` : ''}
-                </div>
-            `;
-            container.insertAdjacentHTML('afterbegin', postHTML);
-            
-            if (pendingPhoto) {
-                const gallery = document.getElementById('photo-gallery');
-                gallery.insertAdjacentHTML('afterbegin', `
-                    <div class="fro-card overflow-hidden relative group animate-fade-in">
-                        <img src="${pendingPhoto}" class="w-full h-48 object-cover">
-                        <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent text-white">
-                            <p class="text-[10px] font-bold">Shared by ${currentUser.name}</p>
-                        </div>
-                    </div>
-                `);
+        setTimeout(() => {
+            if (gameState === 'DEAD') {
+                ui.death.classList.remove('hidden');
+                let progress = Math.floor((player.x / levelEndMarker) * 100);
+                document.getElementById('death-stats').innerText = `Attempt ${attempts} • ${Math.min(99, progress)}%`;
+                attempts++;
             }
+        }, 600);
+    }
 
-            input.value = '';
-            removePhoto();
-            showToast("Post shared! 🚀");
+    function init() {
+        resize();
+        window.addEventListener('resize', resize);
+        window.addEventListener('keydown', (e) => {
+            if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) {
+                e.preventDefault();
+                isPressed = true;
+                if (gameState === 'MENU' || gameState === 'DEAD') startGame(1);
+                else if (gameState === 'WIN') ui.winBtn.click();
+                else jump();
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (['Space', 'ArrowUp', 'KeyW'].includes(e.code)) isPressed = false;
+        });
+        window.addEventListener('mousedown', (e) => {
+            isPressed = true;
+            if (gameState === 'PLAYING' && e.target === canvas) jump();
+            else if (gameState === 'MENU' && e.target === canvas) startGame(1);
+        });
+        window.addEventListener('mouseup', () => isPressed = false);
+        window.addEventListener('touchstart', (e) => {
+            isPressed = true;
+            if (gameState === 'PLAYING') { jump(); e.preventDefault(); }
+        }, { passive: false });
+        window.addEventListener('touchend', () => isPressed = false);
+
+        ui.startBtn.onclick = () => startGame(1);
+        ui.retryBtn.onclick = () => startGame(currentLevel);
+        ui.winBtn.onclick = () => { ui.win.classList.add('hidden'); ui.main.classList.remove('hidden'); gameState = 'MENU'; };
+        ui.muteBtn.onclick = () => {
+            const muted = AudioEngine.toggleMute();
+            ui.muteBtn.innerText = `MUSIC: ${muted ? 'OFF' : 'ON'}`;
+        };
+        requestAnimationFrame(gameLoop);
+    }
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = Math.min(600, window.innerHeight);
+        buildLevel();
+    }
+
+    function update() {
+        if (gameState !== 'PLAYING') {
+            particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life -= 0.02; if (p.life <= 0) particles.splice(i, 1); });
+            return;
         }
 
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const msg = input.value.trim();
-            if (!msg) return;
+        const lvl = levels[currentLevel];
+        player.x += lvl.speed;
+        cameraX = player.x - 150;
 
-            const chat = document.getElementById('chat-window');
-            chat.insertAdjacentHTML('beforeend', `<div class="flex justify-end animate-fade-in"><div class="fro-gradient text-white rounded-2xl rounded-tr-none p-3 max-w-[80%] text-sm shadow-sm font-medium">${msg}</div></div>`);
-            input.value = '';
-            chat.scrollTop = chat.scrollHeight;
+        if (lvl.fly) {
+            if (isPressed) player.vy -= 0.85;
+            player.vy += lvl.grav;
+            player.vy *= 0.96;
+            player.rotation = player.vy * 0.05;
+        } else {
+            player.vy += lvl.grav;
+            if (!player.isGrounded) player.rotation += 0.16;
+            else {
+                let targetRot = Math.round(player.rotation / (Math.PI/2)) * (Math.PI/2);
+                player.rotation += (targetRot - player.rotation) * 0.3;
+            }
         }
 
-        function initData() {
-            const posts = document.getElementById('posts-container');
-            posts.innerHTML = `
-                <div class="fro-card overflow-hidden">
-                    <div class="p-5 flex items-center gap-3">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus" class="w-10 h-10 rounded-full">
-                        <div><p class="font-bold text-sm">Marcus King</p><p class="text-xs text-gray-400">1 hour ago</p></div>
-                    </div>
-                    <div class="px-5 pb-4"><p class="text-gray-700 font-medium">Can't wait for the pep rally tomorrow! 🏀🎺</p></div>
-                </div>
-            `;
+        player.y += player.vy;
+        trail.push({x: player.x, y: player.y, rotation: player.rotation});
+        if (trail.length > 10) trail.shift();
 
-            const gallery = document.getElementById('photo-gallery');
-            gallery.innerHTML = `
-                <div class="fro-card overflow-hidden relative group">
-                    <img src="https://images.unsplash.com/photo-1541829070764-84a7d30dee9d?auto=format&fit=crop&q=80&w=400" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
-                    <div class="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent text-white opacity-0 group-hover:opacity-100 transition">
-                        <p class="text-xs font-bold">School Mural Project</p>
-                    </div>
-                </div>
-            `;
+        const groundY = canvas.height - GROUND_HEIGHT;
+        if (player.y + PLAYER_SIZE > groundY) {
+            player.y = groundY - PLAYER_SIZE;
+            player.vy = 0;
+            player.isGrounded = true;
+        } else {
+            player.isGrounded = false;
         }
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            document.getElementById('toast-message').innerText = msg;
-            t.classList.remove('hidden');
-            setTimeout(() => t.classList.add('opacity-100', '-translate-y-2'), 10);
-            setTimeout(() => {
-                t.classList.remove('opacity-100', '-translate-y-2');
-                setTimeout(() => t.classList.add('hidden'), 300);
-            }, 3000);
+        if (player.x > levelEndMarker - 150) {
+            if (levels[currentLevel + 1]) startGame(currentLevel + 1);
+            else { gameState = 'WIN'; ui.win.classList.remove('hidden'); AudioEngine.stopMusic(); }
         }
 
-        document.getElementById('chat-input').addEventListener('keypress', (e) => e.key === 'Enter' && sendMessage());
-    </script>
+        map.forEach(obj => {
+            if (obj.x < player.x - 100 || obj.x > player.x + 200) return;
+            if (obj.type === 'portal') {
+                if (player.x + PLAYER_SIZE > obj.x && player.x < obj.x + obj.w) {
+                    lvl.fly = !lvl.fly;
+                    obj.type = 'used-portal';
+                }
+            } else if (obj.type === 'block') {
+                if (player.x + PLAYER_SIZE > obj.x && player.x < obj.x + obj.w) {
+                    if (player.y + PLAYER_SIZE > obj.y && player.y + PLAYER_SIZE < obj.y + 25 && player.vy >= 0) {
+                        player.y = obj.y - PLAYER_SIZE; player.vy = 0; player.isGrounded = true;
+                    } else if (player.y + PLAYER_SIZE > obj.y + 5 && player.y < obj.y + obj.h - 5) {
+                        if (player.x + PLAYER_SIZE > obj.x + 2) die();
+                    }
+                }
+            } else if (obj.type === 'spike') {
+                if (player.x + PLAYER_SIZE - 12 > obj.x + 12 && player.x + 12 < obj.x + 28 && player.y + PLAYER_SIZE > obj.y - 35) die();
+            }
+        });
+
+        ui.progress.style.width = Math.min(100, (player.x / levelEndMarker) * 100) + '%';
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = 'rgba(0, 242, 254, 0.05)';
+        const offsetX = -cameraX % 40;
+        for (let x = offsetX; x < canvas.width; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, canvas.height - GROUND_HEIGHT, canvas.width, GROUND_HEIGHT);
+        ctx.strokeStyle = '#4facfe'; ctx.lineWidth = 4; ctx.strokeRect(-10, canvas.height - GROUND_HEIGHT, canvas.width + 20, 5);
+
+        ctx.save();
+        ctx.translate(-cameraX, 0);
+
+        map.forEach(obj => {
+            if (obj.x < cameraX - 50 || obj.x > cameraX + canvas.width + 50) return;
+            if (obj.type === 'block') {
+                ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#4facfe'; ctx.lineWidth = 2;
+                ctx.fillRect(obj.x, obj.y, obj.w, obj.h); ctx.strokeRect(obj.x + 2, obj.y + 2, obj.w - 4, obj.h - 4);
+            } else if (obj.type === 'portal') {
+                ctx.fillStyle = 'rgba(255, 0, 255, 0.3)'; ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+                ctx.strokeStyle = '#ff00ff'; ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+            } else if (obj.type === 'spike') {
+                ctx.fillStyle = '#ff4b2b'; ctx.beginPath(); ctx.moveTo(obj.x, obj.y); ctx.lineTo(obj.x + 20, obj.y - 40); ctx.lineTo(obj.x + 40, obj.y); ctx.fill();
+            }
+        });
+
+        if (gameState !== 'DEAD') {
+            ctx.save();
+            ctx.translate(player.x + PLAYER_SIZE / 2, player.y + PLAYER_SIZE / 2);
+            ctx.rotate(player.rotation);
+            ctx.fillStyle = '#00f2fe';
+            if (levels[currentLevel].fly) {
+                ctx.beginPath(); ctx.moveTo(25, 0); ctx.lineTo(-15, -20); ctx.lineTo(-15, 20); ctx.closePath(); ctx.fill();
+                ctx.strokeStyle = '#fff'; ctx.stroke();
+                if (isPressed) { ctx.fillStyle = '#ff9f43'; ctx.beginPath(); ctx.moveTo(-15, 0); ctx.lineTo(-30, 10); ctx.lineTo(-25, 0); ctx.lineTo(-30, -10); ctx.fill(); }
+            } else {
+                ctx.fillRect(-PLAYER_SIZE / 2, -PLAYER_SIZE / 2, PLAYER_SIZE, PLAYER_SIZE);
+                ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect(-PLAYER_SIZE/2, -PLAYER_SIZE/2, PLAYER_SIZE, PLAYER_SIZE);
+                ctx.fillStyle = '#0a0a1a'; ctx.fillRect(5, -12, 8, 8); ctx.fillRect(5, 4, 8, 8);
+            }
+            ctx.restore();
+        }
+        particles.forEach(p => { ctx.globalAlpha = p.life; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 6, 6); });
+        ctx.restore();
+    }
+
+    function gameLoop() { update(); draw(); requestAnimationFrame(gameLoop); }
+    window.onload = init;
+</script>
 </body>
 </html>
